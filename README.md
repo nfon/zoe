@@ -1,2 +1,2 @@
-# zoe
+# Zoe
 Personnal assistant
