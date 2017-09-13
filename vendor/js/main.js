@@ -12,13 +12,13 @@ var place;
 var schedule;
 var msg = false;
 
-google.maps.event.addDomListener(window, 'load', initialize);		// setup initial map
-
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
+
+google.maps.event.addDomListener(window, 'load', initialize);		// setup initial map
 
 // setup initial map
 function initialize() {
@@ -172,6 +172,7 @@ var scrollTo = function(identifier, speed) {
 }
 
 $(document).ready(function() {
+	$(".firstname").text(firstName);
 	$.ajaxSetup({ cache: false });									// make sure we don't cache our JSON request
 	startAnnyang();	
 });
