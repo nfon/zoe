@@ -1,9 +1,9 @@
-﻿//https://github.com/TalAter/annyang/blob/master/docs/README.md
+//https://github.com/TalAter/annyang/blob/master/docs/README.md
 //http://docs.trakt.apiary.io/#introduction/extended-info
 "use strict";
 
 var openedWebsite = {};
-var firstName = "Nicolas";
+var firstName = "Nico";
 var botName = "Zoé";
 var geocoder;
 var map;
@@ -15,7 +15,7 @@ var msg = false;
 google.maps.event.addDomListener(window, 'load', initialize);		// setup initial map
 
 var tag = document.createElement('script');
-tag.src = "http://www.youtube.com/iframe_api";
+tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 var player;
