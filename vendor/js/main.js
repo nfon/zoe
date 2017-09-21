@@ -1,4 +1,4 @@
-//https://github.com/TalAter/annyang/blob/master/docs/README.md
+﻿//https://github.com/TalAter/annyang/blob/master/docs/README.md
 //http://docs.trakt.apiary.io/#introduction/extended-info
 "use strict";
 
@@ -317,6 +317,7 @@ function startAnnyang(){
 			console.log(words);
 			var query = words.replace(/ /g,"+");
 			var win = window.open("https://www.google.fr/search?q="+query, '_blank');
+			openedWebsite["Google"]=win;
 			win.focus();
 			confirm();
 		}
@@ -360,7 +361,7 @@ function startAnnyang(){
 		}
 
 		var introduction = function(){
-			speakText("Je suis Zoé, votre assistante virtuelle. Je suis là pour vous aider et vous faire gagner du temps. Vous pouvez connaître la liste des commandes que je comprends en me demandant ce que je sais faire!");
+			speakText("Je suis "+botName+", votre assistante virtuelle. Je suis là pour vous aider et vous faire gagner du temps. Vous pouvez connaître la liste des commandes que je comprends en me demandant ce que je sais faire!");
 		}
 
 		/*****************/
@@ -386,7 +387,7 @@ function startAnnyang(){
 			annyang.addCommands({'reprend':  {'regexp': /^(reprend|continue)/, 'callback' : playYoutube}});
 			annyang.addCommands({'restart':  {'regexp': /^(recommence|encore)/, 'callback' : restartYoutube}});
 			annyang.addCommands({'louder':  {'regexp': /^(mets plus fort|plus fort|monte le son)/, 'callback' : louderYoutube}});
-			annyang.addCommands({'quiet':  {'regexp': /^(mets moins fort|moins fort|baisse le son)/, 'callback' : quietYoutube}});
+			annyang.addCommands({'quiet':  {'regexp': /^(mets moins fort|moins fort|baisse le son|tu peux baisser)/, 'callback' : quietYoutube}});
 			annyang.addCommands({'mute':  {'regexp': /^(coupe le son|silence|chut)/, 'callback' : muteYoutube}});
 			annyang.addCommands({'stop':  {'regexp': /^(stop|arrete)/, 'callback' : stopYoutube}});
 		}
@@ -514,6 +515,53 @@ function startAnnyang(){
 			});
 		}
 
+		/*****************/
+		/*      PLAN     */
+		/*****************/
+		var destination = "";
+		var plan = function(dest,travelMode){
+			destination=dest;
+			console.log(dest);
+			if (travelMode==undefined)
+				travelMode="bicycling";
+			var query = dest.replace(/ /g,"+");
+			if (openedWebsite["la carte"])
+				openedWebsite["la carte"].close();
+			var win = window.open("https://www.google.com/maps/dir/?api=1&destination="+query+"&travelmode="+travelMode, '_blank');
+			openedWebsite["la carte"]=win;
+			win.focus();
+			confirm();
+
+			if (travelMode!="walking")
+				annyang.addCommands({'et à pied': planFoot});
+			if (travelMode!="driving")
+				annyang.addCommands({'et en voiture': planDrive});
+			if (travelMode!="bicycling")
+				annyang.addCommands({'et en vélo': planBike});
+			if (travelMode!="transit")
+				annyang.addCommands({'et en métro': planSub});
+		}
+
+		var planFoot = function(){
+			annyang.removeCommands(['et à pied']);
+			plan(destination,"walking");
+		}
+
+		var planDrive = function(){
+			annyang.removeCommands(['et en voiture']);
+			plan(destination,"driving");
+		}
+
+		var planBike = function(){
+			annyang.removeCommands(['et en vélo']);
+			plan(destination,"bicycling");
+		}
+
+		var planSub = function(){
+			annyang.removeCommands(['et en métro']);
+			plan(destination,"transit");
+		}
+
 		// define our commands.
 		// * The key is the phrase you want your users to say.
 		// * The value is the action to do.
@@ -541,6 +589,7 @@ function startAnnyang(){
 		  'qu\'est-ce que j\ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
 		  'qu\'est-ce que j\ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
 		  'lance *video':		  openYoutube,
+		  'guide-moi vers *destination': plan
 		};
 
 		// OPTIONAL: activate debug mode for detailed logging in the console
