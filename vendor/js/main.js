@@ -1,4 +1,4 @@
-﻿//https://github.com/TalAter/annyang/blob/master/docs/README.md
+//https://github.com/TalAter/annyang/blob/master/docs/README.md
 //http://docs.trakt.apiary.io/#introduction/extended-info
 "use strict";
 
@@ -371,6 +371,7 @@ function startAnnyang(){
 			confirm();
 			$("#youtube").show();
 			scrollTo("#youtube");
+			query = query.replace(/ /g,"+");
 			var request = gapi.client.youtube.search.list({
 				q: query,
 				part: 'id,snippet',
