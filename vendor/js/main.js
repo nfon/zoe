@@ -1,4 +1,4 @@
-//https://github.com/TalAter/annyang/blob/master/docs/README.md
+﻿//https://github.com/TalAter/annyang/blob/master/docs/README.md
 //http://docs.trakt.apiary.io/#introduction/extended-info
 "use strict";
 
@@ -7,7 +7,7 @@ var firstName = "Nico";
 var botName = "Zoé";
 var geocoder;
 var map;
-var latitude,longitude;
+var pos = {};
 var place;
 var schedule;
 var msg = false;
@@ -32,7 +32,7 @@ function initialize() {
 	var infoWindow = new google.maps.InfoWindow({map: map});
 	if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
-        var pos = {
+        pos = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
@@ -73,10 +73,9 @@ function codeAddress() {
 
 // function to get weather for an address
 function getWeather(latitude,longitude) {
-	console.log(latitude);
 	if(latitude != '' && longitude != '') {
 		$("#weather").val("Retrieving weather...");										// write temporary response while we get the weather
-		$.getJSON( "http://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&units=imperial", function(data) {	// add '&units=imperial' to get U.S. measurements
+		$.getJSON( "https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&units=metric&lang=fr&APPID=b4a6803e504535d1104054aaf6cdac16", function(data) {	// add '&units=imperial' to get U.S. measurements
 			var currWeather					= new Array();								// create array to hold our weather response data
 			currWeather['currTemp']			= Math.round(data.main.temp);				// current temperature
 			currWeather['highTemp']			= Math.round(data.main.temp_max);			// today's high temp
@@ -94,24 +93,24 @@ function getWeather(latitude,longitude) {
 			currWeather['windCompass']		= Math.round((currWeather['windDegree'] -11.25) / 22.5);	// wind direction (compass value)
 			
 			// array of direction (compass) names
-			var windNames					= new Array("North","North Northeast","Northeast","East Northeast","East","East Southeast", "Southeast", "South Southeast","South","South Southwest","Southwest","West Southwest","West","West Northwest","Northwest","North Northwest");
+			var windNames					= new Array("Nord","Nord Nord Est","Nord Est","Est Nord Est","East","Est Sud Est", "Sud Est", "Sud Sud Est","Sud","Sud Sud Ouest","Sud Ouest","Ouest Sud Ouest","Ouest","Ouest Nord Ouest","Nord Ouest","Nord Nord Ouest");
 			// array of abbreviated (compass) names
-			var windShortNames				= new Array("N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
+			var windShortNames				= new Array("N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSO","SO","OSO","O","ONO","NO","NNO");
 			currWeather['windDirection']	= windNames[currWeather['windCompass']];	// convert degrees and find wind direction name
 			
 			
-			var response 		= "Current Weather: "+currWeather['currTemp']+"\xB0 and "+currWeather['description'];
-			var spokenResponse	= "It is currently "+currWeather['currTemp']+" degrees and "+currWeather['description'];
+			var response 		= "Météo actuelle&nbsp;: "+currWeather['currTemp']+"\xB0 et  le temps est "+currWeather['description'];
+			var spokenResponse	= "Il fait "+currWeather['currTemp']+" degrés et le temps est "+currWeather['description'];
 			
 			if(currWeather['windSpeed']>0) {											// if there's wind, add a wind description to the response
-				response		= response+" with winds out of the "+windNames[currWeather['windCompass']]+" at "+currWeather['windSpeed'];
-				spokenResponse	= spokenResponse+" with winds out of the "+windNames[currWeather['windCompass']]+" at "+currWeather['windSpeed'];
+				response		= response+" avec des vents "+windNames[currWeather['windCompass']]+" à "+currWeather['windSpeed'];
+				spokenResponse	= spokenResponse+" avec des vents "+windNames[currWeather['windCompass']]+" à "+currWeather['windSpeed'];
 				if(currWeather['windSpeed']==1) {
-					response		+= " mile per hour";
-					spokenResponse	+= " mile per hour";
+					response		+= " kilomètres heure";
+					spokenResponse	+= " kilomètres heure";
 				} else {
-					response		+= " miles per hour";
-					spokenResponse	+= " miles per hour";
+					response		+= " kilomètres heure";
+					spokenResponse	+= " kilomètres heure";
 				}
 			}
 			
@@ -475,7 +474,6 @@ function startAnnyang(){
 			var noEvent = true;
 			if (schedule.length > 0) {
 				for (i = 0; i < schedule.length; i++) {
-					console.log(i);
 					var fullDay = false;
 					var event = schedule[i];
 					if (event.start.dateTime)
@@ -484,7 +482,6 @@ function startAnnyang(){
 						fullDay = true;
 				  		var when = new Date(event.start.date);
 					}
-					console.log(when);
 			
 					if (when.getDate() == now.getDate() && when.getMonth() == now.getMonth() && when.getFullYear() == now.getFullYear() && ( fullDay || when.getHours()>now.getHours() || ( when.getHours()==now.getHours() && when.getMinutes()>now.getMinutes()) ) )
 					{
@@ -563,6 +560,31 @@ function startAnnyang(){
 			plan(destination,"transit");
 		}
 
+		var velib = function(){
+			var url = 'https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&lang=fr&facet=banking&facet=bonus&facet=status&facet=contract_name&geofilter.distance='+pos.lat+'%2C'+pos.lng+'%2C1000';
+			$.ajax({
+				type: 'GET',
+				url: url,
+				success: function(result) {
+					var answer = "Non, désolé."
+					if (result.records.length)
+					{
+						answer = "Oui, il y a ";
+						for (var i=0;i<Math.min(3,result.records.length);i++) {
+							var station = result.records[i].fields
+							var name = station.name.substring(station.name.indexOf('-')+1);
+							//var adresse = station.address;
+							var bike = station.bike_stands;
+							var bike_available = station.available_bikes;
+							answer+=bike_available+" vélo"+(bike_available>1?"s":"")+" à la station "+name+" ("+(bike_available*100/bike).toFixed(0)+"%), ";
+						}
+					}
+					answer=answer.substring(0,answer.length-2);
+					speakText(answer);
+				}
+			});
+		}
+
 		// define our commands.
 		// * The key is the phrase you want your users to say.
 		// * The value is the action to do.
@@ -575,7 +597,7 @@ function startAnnyang(){
 		  'age': {'regexp': /^(quel âge as-tu|t\'as quel âge|tu as quel âge)( zoé){0,1}$/, 'callback': privacy},
 		  'auto-destruction': 	  autoDestruction,
 		  'dis *words': 		  sayIt,
-		  'météo': 			  	  meteo,
+		  'quel temps il fait':	  meteo,
 		  'show me *search':      showFlickr,
 		  'cherche *words': 	  search,
 		  'ouvre *words': 	      openWebsite,
@@ -590,7 +612,8 @@ function startAnnyang(){
 		  'qu\'est-ce que j\ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
 		  'qu\'est-ce que j\ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
 		  'lance *video':		  openYoutube,
-		  'guide-moi vers *destination': plan
+		  'guide-moi vers *destination': plan,
+		  'est-ce qu\'il y a des Vélib\'':velib,
 		};
 
 		// OPTIONAL: activate debug mode for detailed logging in the console
