@@ -11,6 +11,7 @@ var pos = {};
 var place;
 var schedule;
 var msg = false;
+var stationAdress = "";
 
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -570,19 +571,27 @@ function startAnnyang(){
 					if (result.records.length)
 					{
 						answer = "Oui, il y a ";
+						stationAdress="";
 						for (var i=0;i<Math.min(3,result.records.length);i++) {
 							var station = result.records[i].fields
 							var name = station.name.substring(station.name.indexOf('-')+1);
-							//var adresse = station.address;
 							var bike = station.bike_stands;
+							if (bike>0 && stationAdress=="")
+								stationAdress = station.address;
 							var bike_available = station.available_bikes;
 							answer+=bike_available+" vélo"+(bike_available>1?"s":"")+" à la station "+name+" ("+(bike_available*100/bike).toFixed(0)+"%), ";
 						}
 					}
 					answer=answer.substring(0,answer.length-2);
 					speakText(answer);
+					annyang.addCommands({'ok montre-moi où c\'est': goVelib});
 				}
 			});
+		}
+
+		var goVelib = function() {
+			if (stationAdress)
+				plan(stationAdress,"walking");
 		}
 
 		// define our commands.
