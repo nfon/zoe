@@ -519,8 +519,6 @@ function startAnnyang(){
 		/*****************/
 		var destination = "";
 		var plan = function(dest,travelMode){
-			destination=dest;
-			console.log(dest);
 			if (travelMode==undefined)
 				travelMode="bicycling";
 			var query = dest.replace(/ /g,"+");
@@ -530,6 +528,47 @@ function startAnnyang(){
 			openedWebsite["la carte"]=win;
 			win.focus();
 			confirm();
+
+			if (travelMode=="bicycling") {
+				var geocoder = new google.maps.Geocoder();
+				geocoder.geocode({
+				    "address": query
+				}, function(results) {
+				    var gps = {
+						lat:results[0].geometry.location.lat(),
+						lng:results[0].geometry.location.lng()
+					}
+					var url = 'https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&lang=fr&facet=banking&facet=bonus&facet=status&facet=contract_name&rows=5&geofilter.distance='+gps.lat+'%2C'+gps.lng+'%2C1000';
+					$.ajax({
+						type: 'GET',
+						url: url,
+						success: function(result) {
+							var answer = ""
+							if (result.records.length)
+							{
+								stationAdress="";
+								answer="Il y a ";
+								for (var i=0;i<Math.min(3,result.records.length);i++) {
+									var station = result.records[i].fields
+									var name = station.name.substring(station.name.indexOf('-')+1);
+									var bike = station.bike_stands;
+									var available_bike_stands = station.available_bike_stands;
+									if (available_bike_stands>3 && stationAdress=="")
+										stationAdress = station.address;
+									if (available_bike_stands>0)
+										answer+=available_bike_stands+" place"+(available_bike_stands>1?"s":"")+" à la station "+name+" ("+(available_bike_stands*100/bike).toFixed(0)+"%), ";
+								}
+							}
+							if (answer!="")
+								answer=answer.substring(0,answer.length-2);
+							else
+								answer="Attention, il n'y a actuellement aucune place disponible aux stations autour de "+dest+".";
+							speakText(answer);
+							annyang.addCommands({'ok montre-moi où c\'est': goVelib});
+						}
+					});
+				});
+			}
 
 			if (travelMode!="walking")
 				annyang.addCommands({'et à pied': planFoot});
@@ -562,12 +601,12 @@ function startAnnyang(){
 		}
 
 		var velib = function(){
-			var url = 'https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&lang=fr&facet=banking&facet=bonus&facet=status&facet=contract_name&geofilter.distance='+pos.lat+'%2C'+pos.lng+'%2C1000';
+			var url = 'https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&lang=fr&facet=banking&facet=bonus&facet=status&facet=contract_name&rows=5&geofilter.distance='+pos.lat+'%2C'+pos.lng+'%2C1000';
 			$.ajax({
 				type: 'GET',
 				url: url,
 				success: function(result) {
-					var answer = "Non, désolé."
+					var answer = "Non, désolé.";
 					if (result.records.length)
 					{
 						answer = "Oui, il y a ";
@@ -576,9 +615,9 @@ function startAnnyang(){
 							var station = result.records[i].fields
 							var name = station.name.substring(station.name.indexOf('-')+1);
 							var bike = station.bike_stands;
-							if (bike>0 && stationAdress=="")
-								stationAdress = station.address;
 							var bike_available = station.available_bikes;
+							if (bike_available>0 && stationAdress=="")
+								stationAdress = station.address;
 							answer+=bike_available+" vélo"+(bike_available>1?"s":"")+" à la station "+name+" ("+(bike_available*100/bike).toFixed(0)+"%), ";
 						}
 					}
