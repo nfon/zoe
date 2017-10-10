@@ -274,7 +274,7 @@ function startAnnyang(){
 					ret="Presque !"
 				else
 					if ( (now.getHours()==18 && now.getMinutes()>=30) || now.getHours()==19)
-						ret="Oui !!  Let's get party started"
+						ret="Oui !!  Let's get the party started"
 					else ret = "C'est trop tard maintenant";
 			speakText(ret);
 		}
@@ -362,6 +362,10 @@ function startAnnyang(){
 
 		var introduction = function(){
 			speakText("Je suis "+botName+", votre assistante virtuelle. Je suis là pour vous aider et vous faire gagner du temps. Vous pouvez connaître la liste des commandes que je comprends en me demandant ce que je sais faire!");
+		}
+
+		var karaoke = function(title){
+			console.log(title);
 		}
 
 		/*****************/
@@ -522,12 +526,9 @@ function startAnnyang(){
 			if (travelMode==undefined)
 				travelMode="bicycling";
 			var query = dest.replace(/ /g,"+");
+
 			if (openedWebsite["la carte"])
 				openedWebsite["la carte"].close();
-			var win = window.open("https://www.google.com/maps/dir/?api=1&destination="+query+"&travelmode="+travelMode, '_blank');
-			openedWebsite["la carte"]=win;
-			win.focus();
-			confirm();
 
 			if (travelMode=="bicycling") {
 				var geocoder = new google.maps.Geocoder();
@@ -543,18 +544,18 @@ function startAnnyang(){
 						type: 'GET',
 						url: url,
 						success: function(result) {
-							var answer = ""
+							var answer = "";
+							var via = "";
 							if (result.records.length)
 							{
-								stationAdress="";
 								answer="Il y a ";
 								for (var i=0;i<Math.min(3,result.records.length);i++) {
 									var station = result.records[i].fields
 									var name = station.name.substring(station.name.indexOf('-')+1);
 									var bike = station.bike_stands;
 									var available_bike_stands = station.available_bike_stands;
-									if (available_bike_stands>3 && stationAdress=="")
-										stationAdress = station.address;
+									if (available_bike_stands>3 && via == "")
+										via = "&waypoints="+station.position[0]+","+station.position[1];
 									if (available_bike_stands>0)
 										answer+=available_bike_stands+" place"+(available_bike_stands>1?"s":"")+" à la station "+name+" ("+(available_bike_stands*100/bike).toFixed(0)+"%), ";
 								}
@@ -565,9 +566,20 @@ function startAnnyang(){
 								answer="Attention, il n'y a actuellement aucune place disponible aux stations autour de "+dest+".";
 							speakText(answer);
 							annyang.addCommands({'ok montre-moi où c\'est': goVelib});
+
+							var win = window.open("https://www.google.com/maps/dir/?api=1&destination="+query+via+"&travelmode="+travelMode, '_blank');
+							openedWebsite["la carte"]=win;
+							win.focus();
+							confirm();
 						}
 					});
 				});
+			}
+			else {
+				var win = window.open("https://www.google.com/maps/dir/?api=1&destination="+query+"&travelmode="+travelMode, '_blank');
+				openedWebsite["la carte"]=win;
+				win.focus();
+				confirm();
 			}
 
 			if (travelMode!="walking")
@@ -651,7 +663,7 @@ function startAnnyang(){
 		  'ouvre *words': 	      openWebsite,
 		  'ferme *website':	  	  closeWebsite,
 		  'introduction': {'regexp': /^(parle moi de toi|qui es-tu|présente-toi)( zoé){0,1}$/, 'callback' : introduction},
-		  'help': {'regexp': /^(help|aide|quelles sont les commandes disponibles|que sais tu faire|qu\'est-ce que tu sais faire')( zoé){0,1}$/, 'callback' : showHelp},
+		  'help': {'regexp': /^(help|aide|quelles sont les commandes disponibles|que sais-tu faire|qu\'est-ce que tu sais faire')( zoé){0,1}$/, 'callback' : showHelp},
 		  'heure': {'regexp': /^(quelle heure est-il|quelle heure il est|il est quelle heure)( zoé){0,1}$/, 'callback': getTime},
 		  'date': {'regexp': /^(on est quel jour|quel jour on est|on est le combien|le combien sommes-nous)( zoé){0,1}$/, 'callback': getDate},
 		  'est-ce que c\'est bientôt le weekend': isWeekend,
@@ -660,6 +672,7 @@ function startAnnyang(){
 		  'qu\'est-ce que j\ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
 		  'qu\'est-ce que j\ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
 		  'lance *video':		  openYoutube,
+		  'trouve-moi les paroles de *song': karaoke,
 		  'guide-moi vers *destination': plan,
 		  'est-ce qu\'il y a des Vélib\'':velib,
 		};
