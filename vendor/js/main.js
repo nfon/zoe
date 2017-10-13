@@ -314,7 +314,6 @@ function startAnnyang(){
 		}
 
 		var search = function(words) {
-			console.log(words);
 			var query = words.replace(/ /g,"+");
 			var win = window.open("https://www.google.fr/search?q="+query, '_blank');
 			openedWebsite["Google"]=win;
@@ -498,6 +497,12 @@ function startAnnyang(){
 		    if (noEvent)
 		    	speakText("Vous n'avez aucun évènement de prévu "+date);
 		}
+		var openAgenda = function() {
+			var win = window.open("https://calendar.google.com/calendar", '_blank');
+			openedWebsite["l'agenda"]=win;
+			win.focus();
+			confirm();
+		}
 		var createEvent = function(){
 			var resource = {
 			  "summary": "Appointment",
@@ -671,6 +676,7 @@ function startAnnyang(){
 		  'est-ce que c\'est l\'heure de l\'apéro': isApero,
 		  'qu\'est-ce que j\ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
 		  'qu\'est-ce que j\ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
+		  'tu peux ouvrir mon agenda': openAgenda,
 		  'lance *video':		  openYoutube,
 		  'trouve-moi les paroles de *song': karaoke,
 		  'guide-moi vers *destination': plan,
