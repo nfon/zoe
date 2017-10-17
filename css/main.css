@@ -150,3 +150,8 @@ div#unsupported h4 {
 div#unsupported p {
   line-height: 20px;
 }
+
+.clickable{
+	cursor:pointer;
+}
+}
