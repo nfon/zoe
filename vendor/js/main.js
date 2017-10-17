@@ -202,6 +202,12 @@ function startAnnyang(){
 		var stop = function(){
 			confirm();
 			speechSynthesis.cancel();
+			annyang.pause();
+			$(".bubble").attr("src","images/icon_speech.png").addClass("clickable");
+			$(".bubble").one("click",function(){
+				$(".bubble").attr("src","images/comment.svg").removeClass("clickable");
+				annyang.resume();
+			});
 		}
 
 		var sayIt = function(sentence){
