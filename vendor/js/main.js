@@ -12,6 +12,10 @@ var place;
 var schedule;
 var msg = false;
 var stationAdress = "";
+var xfactor = {
+	happyness:5,
+	ankward:0
+}
 
 var tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -656,6 +660,10 @@ function startAnnyang(){
 				plan(stationAdress,"walking");
 		}
 
+		var reboot = function() {
+			window.location.href=window.location.href;
+		}
+
 		// define our commands.
 		// * The key is the phrase you want your users to say.
 		// * The value is the action to do.
@@ -680,13 +688,14 @@ function startAnnyang(){
 		  'est-ce que c\'est bientôt le weekend': isWeekend,
 		  'est-ce que c\'est l\'heure du goûter': isGouter,
 		  'est-ce que c\'est l\'heure de l\'apéro': isApero,
-		  'qu\'est-ce que j\ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
-		  'qu\'est-ce que j\ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
+		  'qu\'est-ce que j\'ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
+		  'qu\'est-ce que j\'ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
 		  'tu peux ouvrir mon agenda': openAgenda,
 		  'lance *video':		  openYoutube,
 		  'trouve-moi les paroles de *song': karaoke,
 		  'guide-moi vers *destination': plan,
 		  'est-ce qu\'il y a des Vélib\'':velib,
+		  'réveille-toi':reboot,
 		};
 
 		// OPTIONAL: activate debug mode for detailed logging in the console
