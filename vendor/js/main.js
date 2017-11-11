@@ -2,6 +2,7 @@
 //http://docs.trakt.apiary.io/#introduction/extended-info
 "use strict";
 
+var annyang;
 var openedWebsite = {};
 var firstName = "Nico";
 var botName = "Zoé";
@@ -205,12 +206,13 @@ function startAnnyang(){
 
 		var stop = function(){
 			confirm();
-			speechSynthesis.cancel();
-			annyang.pause();
+			annyang.removeCommands();
+			annyang.addCommands(commands2);
+			
 			$(".bubble").attr("src","images/icon_speech.png").addClass("clickable");
 			$(".bubble").one("click",function(){
 				$(".bubble").attr("src","images/comment.svg").removeClass("clickable");
-				annyang.resume();
+				reprend();
 			});
 		}
 
@@ -269,7 +271,7 @@ function startAnnyang(){
 					ret="Presque !"
 				else
 					if (now.getHours()==17)
-						ret="Oui ! A table !"
+						ret = "Oui ! A table !"
 					else ret = "C'est trop tard maintenant";
 			speakText(ret);
 		}
@@ -284,7 +286,7 @@ function startAnnyang(){
 					ret="Presque !"
 				else
 					if ( (now.getHours()==18 && now.getMinutes()>=30) || now.getHours()==19)
-						ret="Oui !!  Let's get the party started"
+						ret="Oui !!  Let's get the party started!"
 					else ret = "C'est trop tard maintenant";
 			speakText(ret);
 		}
@@ -664,6 +666,12 @@ function startAnnyang(){
 			window.location.href=window.location.href;
 		}
 
+		var reprend = function() {
+			annyang.removeCommands(commands2);
+			annyang.addCommands(commands);
+		}
+
+
 		// define our commands.
 		// * The key is the phrase you want your users to say.
 		// * The value is the action to do.
@@ -691,12 +699,16 @@ function startAnnyang(){
 		  'qu\'est-ce que j\'ai de prévu aujourd\'hui': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (aujourd\'hui)$/, 'callback': agendaToday},
 		  'qu\'est-ce que j\'ai de prévu demain': {'regexp': /^(qu\'est-ce que j\'ai de prévu|est-ce que j\'ai quelque chose de prévu) (demain)$/, 'callback': agendaTomorrow},
 		  'tu peux ouvrir mon agenda': openAgenda,
-		  'lance *video':		  openYoutube,
+		  'lance *video':			   openYoutube,
 		  'trouve-moi les paroles de *song': karaoke,
 		  'guide-moi vers *destination': plan,
 		  'est-ce qu\'il y a des Vélib\'':velib,
-		  'réveille-toi':reboot,
+		  'réveille-toi': reboot,
 		};
+
+		var commands2 = {
+			'reprend' : reprend
+		}
 
 		// OPTIONAL: activate debug mode for detailed logging in the console
 		annyang.debug();
