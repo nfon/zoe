@@ -15,6 +15,14 @@
 		animation: blinker 2s cubic-bezier(.5, 0, 1, 1) infinite;
 	}
 
+  #zoe .face{
+    display: none;
+  }
+
+  #zoe .face.active{
+    display: block;
+  }
+
 	@keyframes blinker {  
 		50% { opacity: 0.0; }
 	}
@@ -29,6 +37,12 @@
 <body>
 <pre id="output"></pre>
   <section id="input">
+    <div id="zoe">
+      <img id="0" class="c0 face active" src="images/zoe/c0.png" alt='0'>
+      <img id="1" class="c1 face" src="images/zoe/c1.png" alt='1'>
+      <img id="2" class="c2 face" src="images/zoe/c2.png" alt='2'>
+      <img id="3" class="c3 face" src="images/zoe/c3.png" alt='3'>
+    </div>
     <img class="bubble" src="images/comment.svg"/>
     <span class="pulse">></span>&nbsp;<code class="input">Dis quelque chose...</code>
   </section>
